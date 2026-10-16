@@ -1,0 +1,40 @@
+# Calendar Dynamics on Fly.io — one machine, one volume, SQLite + Litestream.
+# Change `app` to your app name, and BASE_URL to match.
+app = "calendar-dynamics"
+primary_region = "ord"          # Chicago
+kill_signal = "SIGTERM"
+kill_timeout = "30s"            # time for in-flight requests and jobs to finish
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  DB_PATH = "/data/app.db"
+  BASE_URL = "https://calendar-dynamics.fly.dev"
+  EMAIL_FROM = "Calendar Dynamics <no-reply@calendardynamics.com>"
+
+[mounts]
+  source = "data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Production: keep the machine running so scheduled follow-ups send on time.
+  # For a cheap demo, set auto_stop_machines = "stop" and min_machines_running = 0
+  # (scheduled sends then wait until someone visits and wakes the machine).
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "15s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

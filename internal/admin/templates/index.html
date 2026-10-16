@@ -1,0 +1,44 @@
+{{template "head" "Businesses"}}{{template "nav-user" .Staff}}{{template "head-end"}}
+{{with .Msg}}<div class="msg">{{.}}</div>{{end}}
+<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:14px">
+  <div><h1>Businesses</h1></div>
+  <a class="btn accent" href="/businesses/new">+ Onboard a business</a>
+</div>
+<div class="stats">
+  <div class="stat"><b>{{index .Counts "active"}}</b>Active</div>
+  <div class="stat y"><b>{{index .Counts "onboarding"}}</b>Onboarding</div>
+  <div class="stat r"><b>{{index .Counts "suspended"}}</b>Suspended</div>
+  <div class="stat"><b>{{.Jobs.Available}}</b>Jobs queued</div>
+  <div class="stat {{if .Jobs.Failed}}r{{end}}"><b>{{.Jobs.Failed}}</b>Jobs failed</div>
+</div>
+<div class="card scroll" style="padding:0">
+  <table>
+    <thead><tr><th>Business</th><th>Status</th><th>Owner</th><th>Plan</th><th>Texting</th><th>Contacts</th><th>Upcoming</th><th>Last activity</th></tr></thead>
+    <tbody>
+    {{range .Businesses}}
+      <tr>
+        <td><a href="/businesses/{{.ID}}"><b>{{.Name}}</b></a><br><span class="muted">{{.Trade}}</span></td>
+        <td><span class="pill s-{{.Status}}">{{.Status}}</span></td>
+        <td>{{.OwnerName}}<br><span class="muted">{{.OwnerEmail}}</span></td>
+        <td>{{.Plan}}{{if eq .Deployment "dedicated"}} · dedicated{{end}}</td>
+        <td>{{.A2PStatus}}</td>
+        <td>{{.Contacts}}</td>
+        <td>{{.UpcomingEvents}}</td>
+        <td>{{when .LastActivity}}</td>
+      </tr>
+    {{else}}
+      <tr><td colspan="8" class="muted">No businesses yet. Onboard your first one.</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{with .Jobs.RecentFailures}}
+<div class="card">
+  <h2>Recent failed jobs</h2>
+  <table><thead><tr><th>Kind</th><th>Error</th><th>When</th></tr></thead><tbody>
+  {{range .}}<tr><td>{{.Kind}}</td><td>{{.Error}}</td><td>{{when .At}}</td></tr>{{end}}
+  </tbody></table>
+</div>
+{{end}}
+<p class="muted"><a href="/?deleted=1">Show deleted businesses</a></p>
+{{template "foot"}}

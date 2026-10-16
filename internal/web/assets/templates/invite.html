@@ -1,0 +1,13 @@
+{{template "authhead" "Set up your account"}}
+    <p>Set up your account for <strong>{{.Business}}</strong>.</p>
+  </div>
+  <form method="post">
+    {{with .Error}}<div class="error" role="alert">{{.}}</div>{{end}}
+    <label>Email <input type="email" value="{{.Email}}" disabled></label>
+    <label>Your name <input type="text" name="name" value="{{.Name}}" autocomplete="name" required autofocus></label>
+    <label>Choose a password <input type="password" name="password" autocomplete="new-password" minlength="10" required></label>
+    <label>Type it again <input type="password" name="password2" autocomplete="new-password" minlength="10" required></label>
+    <button type="submit">Create account</button>
+    <p class="muted">Only you will know this password — Calendar Dynamics staff can't see it.</p>
+  </form>
+{{template "authfoot"}}

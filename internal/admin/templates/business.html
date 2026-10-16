@@ -1,0 +1,182 @@
+{{template "head" .B.Name}}{{template "nav-user" .Staff}}{{template "head-end"}}
+{{with .Msg}}<div class="msg">{{.}}</div>{{end}}
+<div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+  <div>
+    <h1>{{.B.Name}} <span class="pill s-{{.B.Status}}">{{.B.Status}}</span></h1>
+    <p class="sub">{{.B.Trade}} · {{.B.Timezone}} · {{.B.Plan}} plan · created {{when .B.CreatedAt}}</p>
+  </div>
+</div>
+
+{{if eq .B.Status "deleted"}}
+  <div class="warn">This business was deleted. Its customer data has been erased and its encryption key destroyed.</div>
+{{else}}
+
+{{with .InviteLink}}
+<div class="card">
+  <h2>Invite link (shown once)</h2>
+  <p class="muted">It was emailed to the owner. You can also read it out or text it during the call. It expires in 3 days.</p>
+  <code class="link">{{.}}</code>
+</div>
+{{end}}
+
+<div class="grid">
+  <!-- Checklist -->
+  <div class="card">
+    <h2>Onboarding checklist · {{.Done}} of {{.Total}}</h2>
+    <div class="bar"><span style="width:{{.Pct}}%"></span></div>
+    <ul class="check">
+      {{range .Checklist}}
+      <li class="{{if .Done}}done{{end}}"><span class="mark">{{if .Done}}✓{{else}}·{{end}}</span><span><b>{{.Label}}</b><small>{{.Detail}}</small></span></li>
+      {{end}}
+    </ul>
+  </div>
+
+  <!-- Owner -->
+  <div class="card stack">
+    <h2>1 · Verify the owner</h2>
+    <dl class="kv">
+      <dt>Owner</dt><dd>{{.B.OwnerName}}</dd>
+      <dt>Email</dt><dd>{{.B.OwnerEmail}}</dd>
+      <dt>Mobile</dt><dd>{{.B.OwnerPhone}}</dd>
+      <dt>Verified</dt><dd>{{if .B.OwnerVerifiedAt}}✓ {{when .B.OwnerVerifiedAt}}{{else}}Not yet{{end}}</dd>
+    </dl>
+    {{if .Can.onboard}}
+    <form method="post" action="/businesses/{{.B.ID}}/verify/send"><button class="ghost" type="submit">Email a 6-digit code to the owner</button></form>
+    <form method="post" action="/businesses/{{.B.ID}}/verify/check" class="row">
+      <label>Code the owner reads back <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label>
+      <button type="submit">Verify</button>
+    </form>
+    <p class="muted">Repeat this check before any account change requested by phone.</p>
+    {{end}}
+  </div>
+
+  <!-- Payment -->
+  <div class="card stack">
+    <h2>2 · Payment</h2>
+    <p class="muted">Send a Stripe Checkout or Payment Link. Never take card numbers over the phone.</p>
+    <p>{{if .B.PaymentLinkSentAt}}✓ Sent {{when .B.PaymentLinkSentAt}}{{else}}Not sent yet{{end}}</p>
+    {{if or .Can.payment .Can.onboard}}
+    <form method="post" action="/businesses/{{.B.ID}}/payment" class="row">
+      <label>Payment link (https://…) <input name="link" type="url" placeholder="https://buy.stripe.com/…"></label>
+      <button type="submit">Email link to owner</button>
+    </form>
+    {{end}}
+  </div>
+
+  <!-- Messaging -->
+  <div class="card stack">
+    <h2>3 · Texting setup</h2>
+    <p class="muted">Each business needs its own A2P 10DLC registration (legal name, address, EIN) with your SMS provider. Email follow-ups work immediately.</p>
+    {{if .Can.onboard}}
+    <form method="post" action="/businesses/{{.B.ID}}/messaging" class="stack">
+      <div class="row">
+        <label>A2P status
+          <select name="a2p_status">
+            {{$s := .B.A2PStatus}}
+            {{range $v := (list "not_started" "submitted" "approved" "rejected")}}<option value="{{$v}}" {{if eq $v $s}}selected{{end}}>{{$v}}</option>{{end}}
+          </select>
+        </label>
+        <label>Business texting number <input name="sms_from" value="{{.B.SMSFrom}}" placeholder="+18475550100"></label>
+      </div>
+      <div class="row">
+        <label>Quiet from (hour) <input type="number" name="quiet_start" min="0" max="23" value="{{.B.QuietStart}}"></label>
+        <label>Quiet until (hour) <input type="number" name="quiet_end" min="0" max="23" value="{{.B.QuietEnd}}"></label>
+        <label>Time zone <input name="timezone" value="{{.B.Timezone}}"></label>
+      </div>
+      <div><button type="submit">Save messaging settings</button></div>
+    </form>
+    {{end}}
+  </div>
+
+  <!-- Import -->
+  <div class="card stack">
+    <h2>4 · Import contacts</h2>
+    <p class="muted">CSV with a header row: Name (or First/Last Name), Phone, Email, Address. Duplicates are skipped. {{.Contacts}} contacts so far.</p>
+    {{if .Can.import}}
+    <form method="post" action="/businesses/{{.B.ID}}/import" enctype="multipart/form-data" class="stack">
+      <label>CSV file <input type="file" name="csv" accept=".csv,text/csv" required></label>
+      <label style="flex-direction:row;gap:8px;font-weight:500"><input type="checkbox" name="consent" value="yes">
+        <span>The owner confirmed on this call that these customers agreed to receive texts from their business.</span></label>
+      <div><button type="submit">Import</button></div>
+    </form>
+    {{end}}
+  </div>
+
+  <!-- Invite -->
+  <div class="card stack">
+    <h2>5 · Invite the owner</h2>
+    <p class="muted">They choose their own password. Staff never set or see customer passwords. {{.Users}} account(s) so far.</p>
+    {{if .Can.invite}}
+    <form method="post" action="/businesses/{{.B.ID}}/invite" class="stack">
+      <div class="row">
+        <label>Email <input type="email" name="email" placeholder="{{.B.OwnerEmail}}"></label>
+        <label>Name <input name="name" placeholder="{{.B.OwnerName}}"></label>
+      </div>
+      <div><button type="submit">Send invite</button></div>
+    </form>
+    {{end}}
+  </div>
+
+  <!-- Status -->
+  <div class="card stack">
+    <h2>6 · Status</h2>
+    {{if .Can.status}}
+    <div class="row">
+      {{if ne .B.Status "active"}}<form method="post" action="/businesses/{{.B.ID}}/status"><input type="hidden" name="status" value="active"><button class="accent" type="submit">Go live</button></form>{{end}}
+      {{if ne .B.Status "suspended"}}<form method="post" action="/businesses/{{.B.ID}}/status"><input type="hidden" name="status" value="suspended"><button class="ghost" type="submit">Suspend</button></form>{{end}}
+    </div>
+    <p class="muted">Suspending pauses sign-in and all automated messages without deleting anything.</p>
+    {{end}}
+  </div>
+</div>
+
+<!-- Support access -->
+<div class="card stack" style="margin-top:18px">
+  <h2>Support access</h2>
+  {{with .Access}}
+    <div class="warn">You have access until {{when .ExpiresAt}} · reason: {{.Reason}}. The owner can see this.</div>
+    <div class="grid">
+      <div class="scroll">
+        <h2>Contacts (first 50)</h2>
+        <table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Texts</th></tr></thead><tbody>
+        {{range $.TenantContacts}}<tr><td>{{.Name}}</td><td>{{.Phone}}</td><td>{{.Email}}</td><td>{{if .OptedOut}}opted out{{else if .SMSConsent}}consented{{else}}—{{end}}</td></tr>{{else}}<tr><td colspan="4" class="muted">None</td></tr>{{end}}
+        </tbody></table>
+      </div>
+      <div class="scroll">
+        <h2>Next 14 days</h2>
+        <table><thead><tr><th>When</th><th>Contact</th><th>Event</th><th>Send</th></tr></thead><tbody>
+        {{range $.TenantEvents}}<tr><td>{{timeIn .Start $.B.Timezone}}</td><td>{{.ContactName}}</td><td>{{.Type}} · {{.Title}}</td><td>{{.SendStatus}}</td></tr>{{else}}<tr><td colspan="4" class="muted">None</td></tr>{{end}}
+        </tbody></table>
+      </div>
+    </div>
+    <p><a href="/businesses/{{$.B.ID}}/export">Download full export (JSON)</a></p>
+  {{else}}
+    <p class="muted">Customer data is hidden by default. Open a 30-minute session with a specific reason — the business owner sees who accessed their account and why.</p>
+    {{if .Can.support}}
+    <form method="post" action="/businesses/{{.B.ID}}/support" class="row">
+      <label>Reason <input name="reason" minlength="10" required placeholder="Owner on phone, consented — ticket #142"></label>
+      <button type="submit">Open support session</button>
+    </form>
+    {{end}}
+  {{end}}
+</div>
+
+{{if .Can.delete}}
+<div class="card stack">
+  <h2>Delete business</h2>
+  <p class="muted">Permanently erases all customer data and destroys the encryption key, so backups can't be read either. Export first if the owner wants their data.</p>
+  <form method="post" action="/businesses/{{.B.ID}}/delete" class="row">
+    <label><span>Type <b>{{.B.Name}}</b> to confirm</span> <input name="confirm" required autocomplete="off"></label>
+    <button class="danger" type="submit">Delete permanently</button>
+  </form>
+</div>
+{{end}}
+{{end}}
+
+<div class="card scroll">
+  <h2>Activity</h2>
+  <table><thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead><tbody>
+  {{range .Audit}}<tr><td>{{when .At}}</td><td>{{.ActorType}}</td><td>{{.Action}}</td><td>{{.Detail}}</td></tr>{{else}}<tr><td colspan="4" class="muted">No activity yet.</td></tr>{{end}}
+  </tbody></table>
+</div>
+{{template "foot"}}

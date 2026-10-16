@@ -1,0 +1,33 @@
+{{template "head" "Onboard a business"}}{{template "nav-user" .Staff}}{{template "head-end"}}
+<h1>Onboard a business</h1>
+<p class="sub">Fill this in while you're on the phone with the owner. Nothing is sent until you take the next steps.</p>
+{{with .Error}}<div class="error">{{.}}</div>{{end}}
+<form method="post" action="/businesses" class="card stack" style="max-width:720px">
+  <div class="row">
+    <label>Business name <input name="name" value="{{.Form.Name}}" required></label>
+    <label>Trade <input name="trade" value="{{.Form.Trade}}" placeholder="Plumbing, HVAC, Electrical…"></label>
+  </div>
+  <div class="row">
+    <label>Owner name <input name="owner_name" value="{{.Form.OwnerName}}" required></label>
+    <label>Owner email <input type="email" name="owner_email" value="{{.Form.OwnerEmail}}" required></label>
+    <label>Owner mobile <input type="tel" name="owner_phone" value="{{.Form.OwnerPhone}}"></label>
+  </div>
+  <div class="row">
+    <label>Time zone
+      <select name="timezone">
+        {{$tz := .Form.Timezone}}
+        {{range $z := (list "America/New_York" "America/Chicago" "America/Denver" "America/Phoenix" "America/Los_Angeles" "America/Anchorage" "Pacific/Honolulu")}}
+          <option value="{{$z}}" {{if eq $z $tz}}selected{{end}}>{{$z}}</option>
+        {{end}}
+      </select>
+    </label>
+    <label>Plan
+      <select name="plan">
+        <option value="solo" {{if eq .Form.Plan "solo"}}selected{{end}}>Solo</option>
+        <option value="crew" {{if eq .Form.Plan "crew"}}selected{{end}}>Crew</option>
+      </select>
+    </label>
+  </div>
+  <div><button type="submit" class="accent">Create business</button></div>
+</form>
+{{template "foot"}}

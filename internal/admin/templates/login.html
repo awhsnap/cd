@@ -1,0 +1,12 @@
+{{template "head" "Sign in"}}{{template "head-end"}}
+<div class="card" style="max-width:400px;margin:40px auto">
+  <h1>Staff sign in</h1>
+  <p class="sub">This panel is only reachable on the private network.</p>
+  {{with .Error}}<div class="error">{{.}}</div>{{end}}
+  <form method="post" action="/login" class="stack">
+    <label>Email <input type="email" name="email" value="{{.Email}}" autocomplete="username" required autofocus></label>
+    <label>Password <input type="password" name="password" autocomplete="current-password" required></label>
+    <button type="submit" class="accent">Sign in</button>
+  </form>
+</div>
+{{template "foot"}}

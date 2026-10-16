@@ -1,0 +1,9 @@
+{{template "head" "Audit log"}}{{template "nav-user" .Staff}}{{template "head-end"}}
+<h1>Audit log</h1>
+<p class="sub">Append-only. The database rejects edits and deletes to this table.</p>
+<div class="card scroll" style="padding:0">
+  <table><thead><tr><th>When</th><th>Actor</th><th>Business</th><th>Action</th><th>Detail</th></tr></thead><tbody>
+  {{range .Entries}}<tr><td>{{when .At}}</td><td>{{.ActorType}}</td><td>{{if .BusinessID}}<a href="/businesses/{{.BusinessID}}">{{.BusinessID}}</a>{{end}}</td><td>{{.Action}}</td><td>{{.Detail}}</td></tr>{{end}}
+  </tbody></table>
+</div>
+{{template "foot"}}

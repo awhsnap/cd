@@ -1,0 +1,14 @@
+# Litestream configuration. Values in ${...} come from environment variables.
+# `fly storage create` sets BUCKET_NAME, AWS_ENDPOINT_URL_S3, AWS_REGION,
+# AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as app secrets automatically.
+dbs:
+  - path: ${DB_PATH}
+    replicas:
+      - type: s3
+        bucket: ${BUCKET_NAME}
+        path: calendar-dynamics/app.db
+        endpoint: ${AWS_ENDPOINT_URL_S3}
+        region: ${AWS_REGION}
+        sync-interval: 1s
+        snapshot-interval: 24h
+        retention: 168h   # keep 7 days of point-in-time history

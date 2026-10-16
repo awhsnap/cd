@@ -1,0 +1,31 @@
+{{define "authhead"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.}} · Calendar Dynamics</title>
+<link rel="stylesheet" href="/static/auth.css">
+</head>
+<body>
+<div class="stripe"></div>
+<main>
+<div class="card">
+  <div class="card-head">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar Dynamics</div>
+{{end}}
+{{define "authfoot"}}
+</div>
+</main>
+</body>
+</html>{{end}}
+{{template "authhead" "Sign in"}}
+    <p>Sign in to your calendar.</p>
+  </div>
+  <form method="post" action="/login">
+    {{with .Error}}<div class="error" role="alert">{{.}}</div>{{end}}
+    <label>Email <input type="email" name="email" value="{{.Email}}" autocomplete="username" required autofocus></label>
+    <label>Password <input type="password" name="password" autocomplete="current-password" required></label>
+    <button type="submit">Sign in</button>
+    <p class="muted">Forgot your password? Call Calendar Dynamics support and we'll send you a new sign-in link.</p>
+  </form>
+{{template "authfoot"}}

@@ -1,0 +1,37 @@
+# Runs the tests on every push and pull request.
+# Pushes to main that pass the tests are deployed to Fly.io.
+#
+# One-time setup: create a deploy token with
+#   fly tokens create deploy -x 999999h
+# and add it to the repository as the secret FLY_API_TOKEN
+# (GitHub → Settings → Secrets and variables → Actions → New repository secret).
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: deploy-production   # never run two deploys at once
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      # Single machine: SQLite has one writer.
+      - run: flyctl deploy --remote-only --ha=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

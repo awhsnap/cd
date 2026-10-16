@@ -1,0 +1,84 @@
+{{define "head"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.}} · Calendar Dynamics Admin</title>
+<style>
+  :root { --navy-900:#0a1f3c; --navy-800:#0f2c55; --blue-600:#1b56a3; --blue-100:#e3edfa; --silver-50:#f4f6f9;
+          --silver-100:#e9edf2; --silver-200:#d8dee6; --silver-300:#b9c3cf; --gray:#56636f; --steel:#3d4a5c; --yellow:#f6c514; --ink:#14202e; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--silver-50); }
+  header.top { background: var(--navy-900); color: #fff; }
+  header.top .in { max-width: 1200px; margin: 0 auto; padding: 12px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+  header.top a { color: #d8dee6; text-decoration: none; font-weight: 600; }
+  header.top a:hover { color: #fff; }
+  .brand { font-weight: 800; font-size: 16px; color: #fff !important; }
+  .brand span { color: var(--yellow); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; margin-left: 8px; }
+  .spacer { flex: 1; }
+  .stripe { height: 5px; background: var(--yellow); }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px; }
+  h1 { margin: 0 0 4px; font-size: 24px; color: var(--navy-900); }
+  h2 { margin: 0 0 12px; font-size: 16px; color: var(--navy-900); }
+  .sub { color: var(--gray); margin: 0 0 18px; }
+  .card { background: #fff; border: 1px solid var(--silver-200); border-radius: 10px; padding: 18px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .grid > .card { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--silver-100); vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--gray); background: var(--silver-100); }
+  .scroll { overflow-x: auto; }
+  a { color: var(--blue-600); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .s-onboarding { background: #fff1b8; color: #4d3b00; } .s-active { background: #dcf3e3; color: #1d6b35; }
+  .s-suspended { background: #fdecea; color: #8a1c13; } .s-deleted { background: var(--silver-200); color: var(--steel); }
+  form { margin: 0; }
+  label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 12px; color: var(--steel); }
+  input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--silver-300); border-radius: 7px; background: #fff; color: var(--ink); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .row > label { flex: 1 1 160px; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  button, .btn { font: inherit; font-weight: 700; border: 0; border-radius: 8px; padding: 9px 14px; cursor: pointer; background: var(--blue-600); color: #fff; text-decoration: none; display: inline-block; }
+  button.accent, .btn.accent { background: var(--yellow); color: var(--navy-900); }
+  button.ghost { background: #fff; color: var(--steel); border: 1px solid var(--silver-300); }
+  button.danger { background: #b42318; }
+  .msg { background: var(--blue-100); border: 1px solid #b8cdee; color: var(--navy-800); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; }
+  .error { background: #fdecea; border: 1px solid #f1c0bb; color: #8a1c13; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; }
+  .warn { background: #fff8db; border: 1px solid #f0d77a; color: #5a4500; padding: 10px 14px; border-radius: 8px; }
+  .check { list-style: none; margin: 0; padding: 0; }
+  .check li { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--silver-100); }
+  .check .mark { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 12px; background: var(--silver-200); color: var(--steel); }
+  .check .done .mark { background: var(--blue-600); color: #fff; }
+  .check small { display: block; color: var(--gray); }
+  .bar { height: 8px; background: var(--silver-200); border-radius: 4px; overflow: hidden; margin: 6px 0 14px; }
+  .bar span { display: block; height: 100%; background: var(--yellow); }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; }
+  .kv dt { color: var(--gray); } .kv dd { margin: 0; }
+  code.link { display: block; padding: 10px; background: var(--silver-100); border-radius: 6px; word-break: break-all; font-size: 13px; }
+  .muted { color: var(--gray); }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .stat { background: #fff; border: 1px solid var(--silver-200); border-left: 4px solid var(--blue-600); border-radius: 8px; padding: 8px 14px; }
+  .stat b { font-size: 20px; color: var(--navy-900); margin-right: 6px; }
+  .stat.y { border-left-color: var(--yellow); } .stat.r { border-left-color: #b42318; }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="brand" href="/">Calendar Dynamics<span>Staff admin</span></a>
+  <a href="/">Businesses</a>
+  <a href="/audit">Audit log</a>
+  <div class="spacer"></div>
+  {{end}}
+{{define "nav-user"}}
+  <span>{{.Name}} · {{.Role}}</span>
+  <form method="post" action="/logout"><button class="ghost" type="submit">Sign out</button></form>
+{{end}}
+{{define "head-end"}}
+</div></header>
+<div class="stripe"></div>
+<main>
+{{end}}
+{{define "foot"}}
+</main>
+</body>
+</html>{{end}}

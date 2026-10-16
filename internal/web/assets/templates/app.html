@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar Dynamics</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+      <span>Calendar Dynamics<span class="biz" id="bizName"></span></span>
+    </div>
+    <nav class="nav">
+      <a href="/app" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</a>
+      <button type="button" class="navlink" id="navContacts"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-4-5.5"/></svg>Contacts</button>
+      <a href="/api/export" id="exportLink"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Export my data</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <span id="userName"></span>
+      </div>
+      <form method="post" action="/logout" style="margin-top:10px">
+        <button type="submit" class="btn btn-ghost" style="width:100%">Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="search" placeholder="Search contacts…" aria-label="Search contacts" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-accent" id="newBtnTop">+ <span class="label">New event</span></button>
+      <div class="avatar" id="avatar" title="Account"></div>
+    </header>
+    <div class="stripe" role="presentation"></div>
+
+    <main class="content">
+      <div class="banner" id="supportBanner" hidden role="status"></div>
+      <div class="page-head">
+        <div>
+          <h1>Calendar</h1>
+          <p id="greeting"></p>
+        </div>
+        <section class="stats" aria-label="Summary">
+          <div class="stat"><span class="value" id="statToday">–</span><span class="label">Jobs today</span></div>
+          <div class="stat silver"><span class="value" id="statWeek">–</span><span class="label">This week</span></div>
+          <div class="stat accent"><span class="value" id="statFollow">–</span><span class="label">Follow-ups · 7d</span></div>
+          <div class="stat"><span class="value" id="statActive">–</span><span class="label">Active contacts</span></div>
+        </section>
+      </div>
+
+      <div class="layout">
+        <section class="card" aria-label="Calendar">
+          <div class="cal-toolbar">
+            <button class="icon-btn" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+            <button class="icon-btn" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></button>
+            <button class="btn btn-ghost" id="todayBtn">Today</button>
+            <h2 class="cal-title" id="calTitle"></h2>
+            <div class="seg" role="group" aria-label="View">
+              <button data-view="month" aria-pressed="true">Month</button>
+              <button data-view="week" aria-pressed="false">Week</button>
+            </div>
+            <button class="btn btn-primary" id="newBtnCal">+ New</button>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div id="calendar"></div>
+        </section>
+
+        <div class="side">
+          <section class="card" aria-label="Day agenda">
+            <div class="panel-head"><h2 id="agendaTitle">Agenda</h2><span id="agendaTag"></span></div>
+            <ul class="list" id="agenda"></ul>
+          </section>
+          <section class="card" aria-label="Contacts" id="contactsCard">
+            <div class="panel-head"><h2>Contacts</h2><button class="btn btn-ghost" id="newContactBtn" style="padding:6px 10px">+ Add</button></div>
+            <ul class="list contact-list" id="contacts"></ul>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== Contact timeline drawer ===== -->
+<div class="drawer-scrim" id="drawerScrim"></div>
+<aside class="drawer" id="drawer" aria-label="Contact timeline" aria-hidden="true">
+  <div class="drawer-head">
+    <button class="close" id="drawerClose" aria-label="Close timeline">×</button>
+    <div class="eyebrow">Contact timeline</div>
+    <div class="contact-id">
+      <div class="av-lg" id="tlAvatar"></div>
+      <div><h2 id="tlName"></h2><div class="sub" id="tlSince"></div></div>
+    </div>
+    <div class="contact-meta" id="tlMeta"></div>
+  </div>
+  <div class="drawer-actions">
+    <button class="btn btn-accent" data-log="job">+ Schedule</button>
+    <button class="btn btn-ghost" data-log="followup">Follow-up</button>
+    <button class="btn btn-ghost" data-log="call">Log call</button>
+    <button class="btn btn-ghost" data-log="note">Add note</button>
+    <button class="btn btn-ghost" id="editContactBtn">Edit contact</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span>Jobs</span><b id="tlJobs">0</b></div>
+    <div class="kpi"><span>Last touch</span><b id="tlLast">—</b></div>
+    <div class="kpi"><span>Next event</span><b id="tlNext">—</b></div>
+  </div>
+  <div class="drawer-body" id="tlBody"></div>
+</aside>
+
+<!-- ===== Event dialog ===== -->
+<dialog id="eventDialog">
+  <form id="eventForm">
+    <div class="dlg-head"><span id="dlgTitle">New event</span><button type="button" data-close aria-label="Close">×</button></div>
+    <div class="dlg-body">
+      <div class="dlg-error" id="eventError" role="alert" hidden></div>
+      <label class="field full">Contact <span class="hint">Pick an existing contact or type a new name</span>
+        <input name="contact" list="contactOptions" required autocomplete="off" placeholder="Customer name">
+        <datalist id="contactOptions"></datalist>
+      </label>
+      <label class="field">Type
+        <select name="type" id="typeSelect"></select>
+      </label>
+      <label class="field">Duration
+        <select name="duration">
+          <option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option>
+          <option value="60">1 hr</option><option value="90">1.5 hr</option><option value="120">2 hr</option>
+          <option value="180">3 hr</option><option value="240">4 hr</option><option value="300">5 hr</option><option value="480">Full day</option>
+        </select>
+      </label>
+      <label class="field full">Title <input name="title" required maxlength="300" placeholder="e.g. Water heater install"></label>
+      <label class="field">Date <input type="date" name="date" required></label>
+      <label class="field">Time <input type="time" name="time" required></label>
+      <label class="field full followup-only" hidden>Send automatically
+        <select name="channel">
+          <option value="">Don't send — just a reminder for me</option>
+          <option value="sms">Text message</option>
+          <option value="email">Email</option>
+        </select>
+      </label>
+      <label class="field full followup-only" hidden>Message to send
+        <textarea name="message" maxlength="1600" placeholder="Hi Dana, just checking in on the quote we sent over…"></textarea>
+      </label>
+      <label class="field full">Notes <textarea name="notes" placeholder="Address, materials, what was discussed…"></textarea></label>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-danger" id="deleteBtn">Delete</button>
+      <button type="button" class="btn btn-ghost" id="timelineBtn">View timeline</button>
+      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===== Contact dialog ===== -->
+<dialog id="contactDialog">
+  <form id="contactForm">
+    <div class="dlg-head"><span id="contactDlgTitle">Contact</span><button type="button" data-close aria-label="Close">×</button></div>
+    <div class="dlg-body">
+      <div class="dlg-error" id="contactError" role="alert" hidden></div>
+      <label class="field full">Name <input name="name" required maxlength="200"></label>
+      <label class="field">Mobile phone <input name="phone" type="tel" autocomplete="off" placeholder="(847) 555-0142"></label>
+      <label class="field">Email <input name="email" type="email" autocomplete="off"></label>
+      <label class="field full">Address <input name="address" autocomplete="off"></label>
+      <label class="field full check"><input type="checkbox" name="smsConsent"> <span>This customer agreed to receive text messages from us</span></label>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+      <button type="submit" class="btn btn-primary">Save contact</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden role="status"></div>
+</body>
+</html>

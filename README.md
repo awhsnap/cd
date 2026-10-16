@@ -83,7 +83,10 @@ fly storage create
 
 # 4. Secrets
 fly secrets set MASTER_KEY="$(openssl rand -base64 32)"
+#    Windows PowerShell — generate the value with:
+#      $b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
 #    ...and store that same value in your password manager.
+#    (The app refuses placeholder keys such as all zeros.)
 fly secrets set POSTMARK_SERVER_TOKEN=... TWILIO_ACCOUNT_SID=... TWILIO_AUTH_TOKEN=... TWILIO_FROM_NUMBER=+1...
 
 # 5. Deploy as a single machine (SQLite has one writer)

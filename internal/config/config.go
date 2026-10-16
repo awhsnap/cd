@@ -62,6 +62,9 @@ func Load() (Config, error) {
 		if err != nil || len(k) != 32 {
 			return c, errors.New("MASTER_KEY must be 32 random bytes, base64-encoded (generate with: openssl rand -base64 32)")
 		}
+		if weakKey(k) {
+			return c, errors.New("MASTER_KEY looks like a placeholder (e.g. all zeros), not random bytes; generate a new one")
+		}
 		c.MasterKey = k
 	case c.Prod():
 		return c, errors.New("MASTER_KEY is required when APP_ENV=production")
@@ -71,6 +74,16 @@ func Load() (Config, error) {
 		c.MasterKey = k[:]
 	}
 	return c, nil
+}
+
+// weakKey rejects obviously non-random keys, such as an all-zero buffer left
+// behind by a failed generation command, or keys with very few distinct bytes.
+func weakKey(k []byte) bool {
+	seen := map[byte]bool{}
+	for _, b := range k {
+		seen[b] = true
+	}
+	return len(seen) < 8
 }
 
 func env(key, def string) string {
